@@ -1,49 +1,516 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validation d'âge et cookies</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redline</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Styles pour les réseaux sociaux */
+    .social-icons {
+      position: fixed;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      display: none; /* Masqués par défaut */
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .social-icons a {
+      display: flex;
+      align-items: center;
+      width: 50px;
+      height: 50px;
+      background-color: #333;
+      color: white;
+      text-decoration: none;
+      font-size: 20px;
+      padding: 10px;
+      border-radius: 0 25px 25px 0;
+      transition: width 0.3s ease-in-out;
+    }
+
+    .social-icons a i {
+      width: 30px;
+      text-align: center;
+    }
+
+    .social-icons a span {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      transition: opacity 0.3s ease-in-out, width 0.3s ease-in-out;
+    }
+
+    .social-icons a:hover {
+      width: 150px;
+    }
+
+    .social-icons a:hover span {
+      opacity: 1;
+      width: auto;
+      margin-left: 10px;
+    }
+
+    .facebook { background-color: #3b5998; }
+    .twitter { background-color: #1da1f2; }
+    .instagram { background-color: #e4405f; }
+    .linkedin { background-color: #0077b5; }
+
+    /* Masquer les boutons LOGIN et REGISTER par défaut */
+    #loginButton, #registerButton {
+      display: none;
+    }
+
+    /* Masquer la section des films et l'en-tête par défaut */
+    #movies-container, #movies-header,
+    #series-container, #series-header,#shop-movies-header {
+      display: none;
+    }
+
+    /* Styles pour le jumbotron */
+    .custom-jumbotron {
+      background-image: url('https://www.theforgemovie.com/images/share.jpg');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 100px 0; /* Ajusté pour plus d'espace */
+      text-align: center;
+      display: none; /* Masqué par défaut */
+      position: relative; /* Permet de positionner le formulaire de recherche de manière absolue */
+    }
+
+    /* Styles pour le formulaire de recherche */
+    .search-form {
+      position: absolute; /* Position absolue par rapport au jumbotron */
+      top: 20px; /* Position en haut */
+      right: 20px; /* Position à l'extrême droite */
+      width: 250px; /* Largeur du formulaire */
+    }
+
+    .search-form .input-group {
+      width: 100%;
+    }
+
+    .search-form .form-control {
+      border-radius: 25px 0 0 25px;
+      border: 2px solid #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 14px; /* Taille de police plus petite */
+      padding: 6px 12px; /* Padding réduit */
+    }
+
+    .search-form .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px; /* Taille de police plus petite */
+    }
+
+    .search-form .btn {
+      border-radius: 0 25px 25px 0;
+      border: 2px solid #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 6px 12px; /* Padding réduit */
+    }
+
+    .search-form .btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Styles pour les cartes de films et séries */
+    .card {
+      flex: 0 0 auto; /* Empêche les cartes de rétrécir ou de grandir */
+      width: 200px; /* Largeur fixe pour chaque carte */
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card-img-top {
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      text-align: center;
+    }
+
+    /* Styles pour les conteneurs des films et séries */
+    .movies-row,
+    .series-row {
+      display: flex; /* Alignement horizontal */
+      overflow-x: auto; /* Défilement horizontal si nécessaire */
+      gap: 15px; /* Espace entre les cartes */
+      padding-bottom: 10px; /* Espace pour le défilement */
+    }
+
+    /* Masquer la barre de défilement pour une meilleure apparence */
+    .movies-row::-webkit-scrollbar,
+    .series-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .movies-row,
+    .series-row {
+      -ms-overflow-style: none; /* IE et Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+
+    /* Styles pour les boutons de filtrage */
+    .filter-buttons {
+      margin-bottom: 20px;
+      display: none; /* Masqué par défaut */
+    }
+
+    .filter-buttons button {
+      margin-right: 10px;
+    }
+
+    /* Styles pour la boîte de consentement aux cookies */
+    #cookieConsentBox {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: rgb(234, 196, 196);
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: none; /* Masqué par défaut */
+    }
+
+    #cookieConsentBox button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    /* Styles pour la section Contactez-nous */
+    #contact-section {
+      padding: 50px 0;
+      background-color: #f9f9f9;
+      display: none; /* Masqué par défaut */
+    }
+
+    #contact-section h6 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #contact-section form {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    #contact-section .form-group {
+      margin-bottom: 20px;
+    }
+
+    #contact-section .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    #contact-section .form-group input,
+    #contact-section .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #contact-section .form-group textarea {
+      resize: vertical;
+      height: 150px;
+    }
+
+    #contact-section button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #contact-section button:hover {
+      background-color: #0056b3;
+    }
+
+    #scrollToTopBtn {
+      display: none; /* Caché par défaut */
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 40px;
+      text-align: center;
+      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    #scrollToTopBtn:hover {
+      background-color: darkred;
+    }
+
+    /* Styles pour les placeholders */
+    #contact-section input::placeholder,
+    #contact-section textarea::placeholder {
+      color: #999; /* Couleur du texte */
+      font-style: italic; /* Texte en italique */
+      font-size: 14px; /* Taille du texte */
+    }
+
+    /* Styles pour les champs de saisie */
+    #contact-section input,
+    #contact-section textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    #contact-section textarea {
+      resize: vertical;
+      height: 150px;
+    }
+
+    /* Styles pour la section Contactez-nous */
+    #contact-section {
+      padding: 50px 0;
+      background-color: #f9f9f9;
+      display: none; /* Masqué par défaut */
+    }
+
+    #contact-section h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #contact-section form {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Disposition en grille pour les champs */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Deux colonnes de largeur égale */
+      gap: 15px; /* Espace entre les champs */
+      margin-bottom: 20px;
+    }
+
+    /* Styles pour les champs de saisie */
+    #contact-section input,
+    #contact-section textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    #contact-section textarea {
+      resize: vertical;
+      height: 150px;
+    }
+
+    /* Styles pour les placeholders */
+    #contact-section input::placeholder,
+    #contact-section textarea::placeholder {
+      color: #999; /* Couleur du texte */
+      font-style: italic; /* Texte en italique */
+      font-size: 14px; /* Taille du texte */
+    }
+
+    #contact-section button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #contact-section button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Styles pour la section Boutique Film */
+    .shop-movies-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .shop-movies-row {
+      display: flex;
+      overflow-x: hidden; /* Masquer le dépassement horizontal */
+      gap: 15px;
+      scroll-behavior: smooth; /* Défilement fluide */
+      width: 100%;
+    }
+
+    .scroll-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color 0.3s;
+    }
+
+    .scroll-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Styles pour les cartes de films */
+    .card {
+      flex: 0 0 auto;
+      width: 200px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card-img-top {
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      text-align: center;
+    }
+    /* Styles pour les liens "Contact" et "Home" */
+.jumbotron-links {
+  position: absolute;
+  top: 20px; /* Position en haut */
+  left: 20px; /* Position à gauche */
+  display: flex;
+  gap: 10px; /* Espace entre les boutons */
+}
+
+.search-form {
+  position: absolute; /* Position absolue par rapport au jumbotron */
+  top: 20px; /* Position en haut */
+  right: 20px; /* Position à l'extrême droite */
+  width: 250px; /* Largeur du formulaire */
+}
+.jumbotron-links .btn {
+  font-size: 14px; /* Taille de police plus petite */
+  padding: 6px 12px; /* Padding réduit */
+  border-radius: 25px; /* Boutons arrondis */
+  border: 2px solid #fff; /* Bordure blanche */
+  background-color: rgba(255, 255, 255, 0.1); /* Fond semi-transparent */
+  color: white; /* Texte blanc */
+  transition: background-color 0.3s ease; /* Transition fluide */
+}
+
+.jumbotron-links .btn:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* Fond plus clair au survol */
+}
+#loadMoreMoviesButton,
+#showLessMoviesButton {
+    display: none;
+    margin: 10px auto;
+    display: block;
+    text-align: center;
+}
+#loadMoreSeriesButton,
+#showLesSeriesButton {
+    display: none;
+    margin: 10px auto;
+    display: block;
+    text-align: center;
+}
+
+  </style>
 </head>
 <body>
-
-    <!-- Modal Date de Naissance -->
-    <div class="modal fade" id="birthDateModal" tabindex="-1" aria-labelledby="birthDateModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sélectionner votre Date de Naissance</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="birthDateForm">
-                        <div class="mb-3">
-                            <label for="birthDate" class="form-label">Date de naissance</label>
-                            <input type="date" class="form-control" id="birthDate" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" id="submitBtn">Valider</button>
-                </div>
-            </div>
+    
+  <!-- Modal Date de Naissance -->
+  <div class="modal fade" id="birthDateModal" tabindex="-1" aria-labelledby="birthDateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title">Sélectionner votre Date de Naissance</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
+        <div class="modal-body">
+          <form id="birthDateForm">
+            <div class="mb-3">
+              <label for="birthDate" class="form-label">Date de naissance</label>
+              <input type="date" class="form-control" id="birthDate" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="submitBtn">Valider</button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Boîte de consentement aux cookies -->
-    <div id="cookieConsentBox" style="display: none; background-color: #f8d7da; padding: 10px; text-align: center;">
-        <p>Ce site utilise des cookies pour améliorer votre expérience. En continuant à naviguer, vous acceptez notre utilisation des cookies.</p>
-        <button class="btn btn-primary" onclick="acceptCookies()">Accepter</button>
-    </div>
+  <!-- Boîte de consentement aux cookies -->
+  <div id="cookieConsentBox">
+    Ce site utilise des cookies pour améliorer votre expérience. En continuant à naviguer, vous acceptez notre utilisation des cookies.
+    <button onclick="acceptCookies()">Accepter</button>
+  </div>
 
-    <!-- Contenu du site (masqué par défaut) -->
-    <div id="mainContent" style="display: none;">
-    </div>
-     <!-- Boutons LOGIN et REGISTER -->
-     <div class="mt-4">
+  <!-- Section jumbotron et boutons -->
+  <div class="container mt-3">
+    <div class="custom-jumbotron" id="jumbotronSection">
+      <!-- Titre et description -->
+      <h2>LATEST ONLINE MOVIES</h2>
+      <p>IN SPACE ONE CAN HEAR YOU SCREAM</p>
+  
+      <!-- Liens "Contact" et "Home" -->
+      <div class="jumbotron-links">
+        <a href="#contact-section" class="btn btn-outline-light">Contact</a>
+        <a href="#" class="btn btn-outline-light">Home</a>
+      </div>
+  
+      <!-- Formulaire de recherche -->
+      <form class="search-form" id="searchForm">
+        <div class="input-group">
+          <input type="text" class="form-control" id="searchInput" placeholder="Rechercher..." aria-label="Rechercher">
+          <button class="btn btn-outline-light" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </form>
+      
+  
+      <!-- Boutons LOGIN et REGISTER -->
+      <div class="mt-4">
         <button type="button" class="btn btn-primary" id="loginButton" data-bs-toggle="modal" data-bs-target="#loginModal">
           LOGIN
         </button>
@@ -53,12 +520,100 @@
       </div>
     </div>
   </div>
+
+  <!-- Section des réseaux sociaux -->
+  <div class="social-icons" id="socialIcons">
+    <a href="#" class="facebook">
+      <i class="fab fa-facebook-f"></i>
+      <span>Facebook</span>
+    </a>
+    <a href="#" class="twitter">
+      <i class="fab fa-twitter"></i>
+      <span>Twitter</span>
+    </a>
+    <a href="#" class="instagram">
+      <i class="fab fa-instagram"></i>
+      <span>Instagram</span>
+    </a>
+    <a href="#" class="linkedin">
+      <i class="fab fa-linkedin-in"></i>
+      <span>LinkedIn</span>
+    </a>
+  </div>
+
+  <!-- Section des films -->
+  <div class="container my-4">
+    <h3 id="movies-header">FEATURED MOVIES</h3>
+    <div class="filter-buttons">
+      <button onclick="filterMovies('all')">Tous</button>
+      <button onclick="filterMovies('Drame chrétien')">Drame chrétien</button>
+      <button onclick="filterMovies('Action')">Action</button>
+      <button onclick="filterMovies('Crime')">Crime</button>
+    </div>
+    <div id="movies-container" class="movies-row"></div>
+    <button id="loadMoreMoviesButton" onclick="loadMoreMovies()" style="display: none;">Plus de films</button>
+    <button id="showLessMoviesButton" onclick="showLessMovies()" style="display: none;">Moins de films</button>
+  </div>
+  <!-- Section des séries TV -->
+  <div class="container my-4">
+    <h4 id="series-header">FEATURES SERIES TV</h4>
+    <div class="filter-buttons">
+      <button onclick="filterSeries('all')">Tous</button>
+      <button onclick="filterSeries('Drame')">Drame</button>
+      <button onclick="filterSeries('Comédie')">Comédie</button>
+      <button onclick="filterSeries('Science-Fiction')">Science-Fiction</button>
+    </div>
+    <div id="series-container" class="series-row"></div>
+    <button id="loadMoreSeriesButton" onclick="loadMoreSeries()" style="display: none;">Plus de séries</button>
+    <button id="showLessSeriesButton" onclick="showLessSeries()" style="display: none;">Moins de séries</button>
+  </div>
+  <!-- Section Boutique Film -->
+  <div class="container my-4">
+    <h5 id="shop-movies-header">SHOP MOVIES</h4>
+    <div class="shop-movies-container">
+      <button id="scrollLeftButton" class="scroll-button"></button>
+      <div id="shop-movies-row" class="shop-movies-row">
+        <!-- Les films seront ajoutés ici dynamiquement -->
+      </div>
+      <button id="scrollRightButton" class="scroll-button">&#10095;</button>
+    </div>
+  </div>
+
+  <!-- Section Contactez-nous -->
+  <div id="contact-section">
+    <div class="container">
+      <h6>CONTACT-US</h6>
+      <form id="contactForm">
+        <div class="form-row">
+          <div class="form-group">
+            <input type="text" id="name" name="name" placeholder="FIRST NAME" required>
+          </div>
+          <div class="form-group">
+            <input type="text" id="lastname" name="lastname" placeholder="LAST NAME" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <input type="email" id="email" name="email" placeholder="EMAIL" required>
+          </div>
+          <div class="form-group">
+            <input type="text" id="subject" name="subject" placeholder="SUBJECT" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <textarea id="message" name="message" placeholder="YOUR MESSAGE" required></textarea>
+        </div>
+        <button type="submit">SEND MESSAGE</button>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal Login -->
   <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="loginModalLabel">Connexion</h5>
+          <h7 class="modal-title" id="loginModalLabel">Connexion</h7>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -81,7 +636,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-primary" id="loginBtn">Se connecter</button>
+          <button type="button" class="btn btn-primary" id="loginBtn">Ok</button>
         </div>
       </div>
     </div>
@@ -92,7 +647,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="registerModalLabel">Inscription</h5>
+          <h8 class="modal-title" id="registerModalLabel">Inscription</h8>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -116,7 +671,7 @@
             </div>
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="terms">
-              <label class="form-check-label" for="terms">Accepter les termes</label>
+              <label class="form-check-label" for="terms">select</label>
             </div>
           </form>
         </div>
@@ -126,88 +681,645 @@
       </div>
     </div>
   </div>
+  <!-- Modal pour les détails des films -->
+  <div class="modal fade" id="movieModal" tabindex="-1" aria-labelledby="movieModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h9 class="modal-title" id="movieModalLabel">Détails du film</h9>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h10 id="movieTitle"></h10>
+          <p><strong>Année :</strong> <span id="movieYear"></span></p>
+          <p><strong>Genre :</strong> <span id="movieGenre"></span></p>
+          <p><strong>Réalisateur :</strong> <span id="movieDirector"></span></p>
+          <p><strong>Acteurs :</strong> <span id="movieActors"></span></p>
+          <p><strong>Description :</strong> <span id="movieDescription"></span></p>
+          <iframe id="movieTrailer" width="100%" height="315" src="" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        // Fonction pour définir un cookie
-        function setCookie(name, value, days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";
+  <!-- Modal pour afficher les données du formulaire -->
+  <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h11 class="modal-title" id="contactModalLabel">Message envoyé</h11>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nom :</strong> <span id="modalName"></span></p>
+          <p><strong>Email :</strong> <span id="modalEmail"></span></p>
+          <p><strong>Sujet :</strong> <span id="modalSubject"></span></p>
+          <p><strong>Message :</strong> <span id="modalMessage"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts JavaScript -->
+  <script>
+    // Fonction pour définir un cookie
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // Fonction pour récupérer un cookie
+    function getCookie(name) {
+      const cookieName = name + "=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const cookieArray = decodedCookie.split(';');
+      for (let i = 0; i < cookieArray.length; i++) {
+        let cookie = cookieArray[i];
+        while (cookie.charAt(0) === ' ') {
+          cookie = cookie.substring(1);
         }
-
-        // Fonction pour récupérer un cookie
-        function getCookie(name) {
-            const cookies = document.cookie.split("; ");
-            for (let cookie of cookies) {
-                let [key, value] = cookie.split("=");
-                if (key === name) return value;
-            }
-            return "";
+        if (cookie.indexOf(cookieName) === 0) {
+          return cookie.substring(cookieName.length, cookie.length);
         }
+      }
+      return "";
+    }
 
-        // Fonction pour afficher le contenu principal
-        function showContent() {
-            document.getElementById("mainContent").style.display = "block";
-        }
+    // Fonction pour accepter les cookies
+    function acceptCookies() {
+      setCookie("cookieConsent", "accepted", 30); // Expire dans 30 jours
+      document.getElementById("cookieConsentBox").style.display = "none";
+      showContent(); // Afficher le contenu après l'acceptation
+    }
 
-        // Fonction pour accepter les cookies
-        function acceptCookies() {
-            setCookie("cookieConsent", "accepted", 30);
-            document.getElementById("cookieConsentBox").style.display = "none";
-            showContent();
-        }
+    // Fonction pour afficher le contenu
+    function showContent() {
+      document.getElementById("jumbotronSection").style.display = "block";
+      document.getElementById("loginButton").style.display = "inline-block";
+      document.getElementById("registerButton").style.display = "inline-block";
+      document.getElementById("socialIcons").style.display = "flex";
+      
+      // Afficher les en-têtes, filtres et boutons pour les films
+      document.getElementById("movies-header").style.display = "block";
+      document.getElementById("movies-container").style.display = "flex";
+      document.querySelector(".filter-buttons").style.display = "block"; // Afficher les filtres
+      document.getElementById("loadMoreMoviesButton").style.display = "block"; // Afficher le bouton "Plus de films"
+      document.getElementById("showLessMoviesButton").style.display = "none"; // Masquer le bouton "Moins de films"
 
-        // Vérification au chargement de la page
-        window.addEventListener("DOMContentLoaded", () => {
-            const birthDateCookie = getCookie("birthDate");
-            const cookieConsent = getCookie("cookieConsent");
+      // Afficher les en-têtes, filtres et boutons pour les séries
+      document.getElementById("series-header").style.display = "block";
+      document.getElementById("series-container").style.display = "flex";
+      document.querySelectorAll(".filter-buttons")[1].style.display = "block"; // Afficher les filtres
+      document.getElementById("loadMoreSeriesButton").style.display = "block"; // Afficher le bouton "Plus de séries"
+      document.getElementById("showLessSeriesButton").style.display = "none"; // Masquer le bouton "Moins de séries"
 
-            if (!birthDateCookie) {
-                // Afficher le modal de date de naissance
-                let birthDateModal = new bootstrap.Modal(document.getElementById("birthDateModal"));
-                birthDateModal.show();
-            } else if (!cookieConsent) {
-                // Afficher la boîte de consentement aux cookies
-                document.getElementById("cookieConsentBox").style.display = "block";
-            } else {
-                // Afficher le contenu si l'utilisateur a déjà accepté les cookies
-                showContent();
-            }
-        });
+      // Afficher les films et séries
+      displayMovies();
+      displaySeries();
 
-        // Validation de l'âge et affichage des cookies
-        document.getElementById("submitBtn").addEventListener("click", () => {
-            const birthDate = new Date(document.getElementById("birthDate").value);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            let monthDiff = today.getMonth() - birthDate.getMonth();
-            let dayDiff = today.getDate() - birthDate.getDate();
+      // Afficher la section "Contact Us"
+      document.getElementById("contact-section").style.display = "block";
+    }
 
-            // Vérification des mois et jours pour s'assurer que l'âge est correct
-            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-                age--;
-            }
+    // Liste des films
+    const movies = [
+      {
+        title: "La Passion du Christ",
+        year: 2004,
+        genre: "Drame chrétien",
+        director: "Mel Gibson",
+        actors: "Jim Caviezel, Monica Bellucci, Maia Morgenstern",
+        description: "Ce film retrace les dernières heures de la vie de Jésus-Christ, de son arrestation à sa crucifixion. Il est connu pour son réalisme intense et sa fidélité aux récits bibliques.",
+        poster: "https://www.mauvais-genres.com/40016-thickbox_default/la-passion-du-christ-affiche-de-film-40x54-cm-2004-jim-caviezel-mel-gibson.jpg",
+        trailer: "https://www.youtube.com/embed/AnKGG8K5Bso?si=1ZzMxoniYWFp8ksP"
+      },
+      {
+        title: "Courageous",
+        year: 2011,
+        genre: "Drame chrétien",
+        director: "Alex Kendrick",
+        actors: "Alex Kendrick, Ken Bevel, Kevin Downes",
+        description: "Ce film suit un groupe de policiers qui, après une tragédie personnelle, décident de s'engager à devenir de meilleurs pères et maris, guidés par leur foi.",
+        poster: "https://m.media-amazon.com/images/M/MV5BZTJiZWE4NmYtYTA4MC00MjE5LTk1NTItYzg2YjU5YWNjNGNiXkEyXkFqcGdeQXVyMzI4NzU1MzA@._V1_FMjpg_UX1000_.jpg",
+        trailer: "https://www.youtube.com/embed/e0suwAju8x0?si=NjIt4tzhezPLk1PW"
+      },
+      {
+        title: "Fireproof",
+        year: 2008,
+        genre: "Drame chrétien",
+        director: "Alex Kendrick",
+        actors: "Kirk Cameron, Erin Bethea, Ken Bevel",
+        description: "Un pompier tente de sauver son mariage en suivant un défi de 40 jours basé sur des principes chrétiens.",
+        poster: "https://res.cloudinary.com/jerrick/image/upload/c_scale,f_jpg,q_auto/apgmc7akrutpy7y5zcar.jpg",
+        trailer: "https://www.youtube.com/embed/-isPcNEjte0?si=grW_SKCM1VemzX92"
+      },
+      {
+        title: "War Room",
+        year: 2015,
+        genre: "Drame chrétien",
+        director: "Alex Kendrick",
+        actors: "Priscilla Shirer, T.C. Stallings, Karen Abercrombie",
+        description: "Une femme découvre la puissance de la prière et transforme sa vie et celle de sa famille en créant un war room (salle de guerre spirituelle).",
+        poster: "https://i.ytimg.com/vi/mIl-XY9t_Lw/maxresdefault.jpg",
+        trailer: "https://www.youtube.com/embed/yUZEF8jZsHo?si=CPDqU5nOxWe3MsZw"
+      },
+      {
+        title: "God's Not Dead",
+        year: 2014,
+        genre: "Drame chrétien",
+        director: "Harold Cronk",
+        actors: "Shane Harper, Kevin Sorbo, David A.R. White",
+        description: "Un étudiant défend sa foi face à un professeur athée dans un débat universitaire.",
+        poster: "https://johnmstuart.com/wp-content/uploads/2014/04/gods-not-dead.jpg",
+        trailer: "https://www.youtube.com/embed/R0KTUAi3uiM?si=KSQZPmXk5trHlRyG"
+      },
+      {
+        title: "Inception",
+        year: 2010,
+        genre: "Action",
+        director: "Christopher Nolan",
+        actors: "Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page",
+        description: "Un voleur professionnel utilise la technologie du rêve partagé pour infiltrar l'esprit des autres.",
+        poster: "https://image.tmdb.org/t/p/original/xymM5aW6MDcH5AR9I3CamSegJd6.jpg",
+        trailer: "https://www.youtube.com/embed/ClbWEc6U-dg?si=X537PPmbkcgjMW-4"
+      },
+      {
+        title: "The Dark Knight",
+        year: 2008,
+        genre: "Crime",
+        director: "Christopher Nolan",
+        actors: "Christian Bale, Heath Ledger, Aaron Eckhart",
+        description: "Batman doit affronter le Joker qui sème le chaos à Gotham City.",
+        poster: "https://image.tmdb.org/t/p/original/eP5NL7ZlGoW9tE9qnCdHpOLH1Ke.jpg",
+        trailer: "https://www.youtube.com/embed/EXeTwQWrcwY"
+      }
+    ];
 
-            if (age < 18) {
-                alert("Vous êtes mineur. Redirection vers IMDb.");
-                window.location.href = "https://www.imdb.com";
-            } else {
-                alert("Bienvenue sur le site !");
-                setCookie("birthDate", document.getElementById("birthDate").value, 30);
+    // Liste des séries TV
+    const series = [
+      {
+        title: "God's Compass",
+        year: 2016,
+        genre: "Drame",
+        director: "Stephan Schultze",
+        actors: "Karyme Lozano, Eric Roberts, T.C. Stallings",
+        description: "Un film inspirant sur la foi et la résilience face aux épreuves de la vie.",
+        poster: "https://www.thechristianfilmreview.com/wp-content/uploads/2016/09/1469803756_h5qnoqsiqyfbdp9wfeaskifrasx-768x1152.jpg",
+        trailer: "https://www.youtube.com/embed/example1"
+      },
+      {
+        title: "Bad Moms",
+        year: 2016,
+        genre: "Comédie",
+        director: "Jon Lucas, Scott Moore",
+        actors: "Mila Kunis, Kristen Bell, Kathryn Hahn",
+        description: "Trois mamans surmenées décident de se libérer des attentes de la société et de s'amuser un peu.",
+        poster: "https://m.media-amazon.com/images/M/MV5BMjIwNzE5MTgwNl5BMl5BanBnXkFtZTgwNjM4OTA0OTE@._V1_.jpg",
+        trailer: "https://www.youtube.com/embed/example2"
+      },
+      {
+        title: "Jason Bourne",
+        year: 2016,
+        genre: "Action",
+        director: "Paul Greengrass",
+        actors: "Matt Damon, Tommy Lee Jones, Alicia Vikander",
+        description: "Jason Bourne revient pour découvrir la vérité sur son passé et affronter de nouveaux ennemis.",
+        poster: "https://static1.srcdn.com/wordpress/wp-content/uploads/2023/06/jason-bourne-franchise-poster.jpg",
+        trailer: "https://www.youtube.com/embed/example3"
+      },
+      {
+        title: "Rezort",
+        year: 2015,
+        genre: "Science-Fiction",
+        director: "Steve Barker",
+        actors: "Dougray Scott, Jessica De Gouw, Martin McCann",
+        description: "Un groupe de survivants doit combattre des zombies dans une île de vacances.",
+        poster: "https://static.tvtropes.org/pmwiki/pub/images/the_rezort.jpg",
+        trailer: "https://www.youtube.com/embed/example4"
+      },
+      {
+        title: "Peter",
+        year: 2021,
+        genre: "Drame",
+        director: "F. Gary Gray",
+        actors: "Chiwetel Ejiofor, Lucy Liu, Rosalind Chao",
+        description: "Un film inspirant sur la vie de l'apôtre Pierre.",
+        poster: "https://static1.srcdn.com/wordpress/wp-content/uploads/2023/06/jason-bourne-franchise-poster.jpg",
+        trailer: "https://www.youtube.com/embed/example5"
+      },
+      {
+        title: "War Dogs",
+        year: 2016,
+        genre: "Comédie",
+        director: "Todd Phillips",
+        actors: "Jonah Hill, Miles Teller, Ana de Armas",
+        description: "Deux amis se lancent dans le commerce d'armes et deviennent millionnaires.",
+        poster: "https://m.media-amazon.com/images/M/MV5BMjA4Nzg0NjUyNV5BMl5BanBnXkFtZTgwNjYxNDM0ODE@._V1_.jpg",
+        trailer: "https://www.youtube.com/embed/example6"
+      },
+      {
+        title: "Civil War",
+        year: 2024,
+        genre: "Action",
+        director: "Alex Garland",
+        actors: "Kirsten Dunst, Wagner Moura, Cailee Spaeny",
+        description: "Un film d'action intense sur une guerre civile dans un futur proche.",
+        poster: "https://mr.comingsoon.it/imgdb/PrimoPiano/impaginate/civil_war_poster.jpg",
+        trailer: "https://www.youtube.com/embed/example7"
+      },
+      {
+        title: "The Secret Life of Pets",
+        year: 2016,
+        genre: "Comédie",
+        director: "Chris Renaud",
+        actors: "Louis C.K., Eric Stonestreet, Kevin Hart",
+        description: "Découvrez ce que font vos animaux de compagnie quand vous n'êtes pas à la maison.",
+        poster: "https://www.slashfilm.com/wp/wp-content/images/The-Secret-Life-of-Pets-trailer.jpg",
+        trailer: "https://www.youtube.com/embed/example8"
+      }
+    ];
 
-                // Afficher la boîte de consentement aux cookies après validation de l'âge
-                document.getElementById("cookieConsentBox").style.display = "block";
+    // Variables pour gérer l'affichage des films et séries
+    let visibleMovies = 4; // Nombre de films visibles initialement
+    let visibleSeries = 4; // Nombre de séries visibles initialement
+    let currentMovieGenre = "all"; // Genre actuellement sélectionné pour les films
+    let currentSeriesGenre = "all"; // Genre actuellement sélectionné pour les séries
 
-                // Afficher le contenu du site
-                showContent();
+    // Afficher les films
+    function displayMovies() {
+      const container = document.getElementById("movies-container");
+      container.innerHTML = ''; // Vider le conteneur avant de le remplir
 
-                // Fermer le modal après validation
-                let birthDateModal = bootstrap.Modal.getInstance(document.getElementById("birthDateModal"));
-                birthDateModal.hide();
-            }
-        });
-    </script>
+      const filteredMovies = currentMovieGenre === "all"
+        ? movies
+        : movies.filter(movie => movie.genre === currentMovieGenre);
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+      filteredMovies.slice(0, visibleMovies).forEach(movie => {
+        const movieCard = document.createElement("div");
+        movieCard.classList.add("col-md-3", "mb-4");
+        movieCard.innerHTML = `
+          <div class="card">
+            <img src="${movie.poster}" class="card-img-top" alt="${movie.title}">
+            <div class="card-body">
+              <h5 class="card-title">${movie.title}</h5>
+              <p class="card-text">${movie.year}</p>
+            </div>
+          </div>
+        `;
+        movieCard.addEventListener("click", () => showMovieDetails(movie));
+        container.appendChild(movieCard);
+      });
+
+      // Afficher ou masquer les boutons "Plus de films" et "Moins de films"
+      if (filteredMovies.length > visibleMovies) {
+        document.getElementById("loadMoreMoviesButton").style.display = "block";
+        document.getElementById("showLessMoviesButton").style.display = "none";
+      } else {
+        document.getElementById("loadMoreMoviesButton").style.display = "none";
+        document.getElementById("showLessMoviesButton").style.display = "none";
+      }
+    }
+
+    // Afficher les séries TV
+    function displaySeries() {
+      const container = document.getElementById("series-container");
+      container.innerHTML = ''; // Vider le conteneur avant de le remplir
+
+      const filteredSeries = currentSeriesGenre === "all"
+        ? series
+        : series.filter(serie => serie.genre === currentSeriesGenre);
+
+      filteredSeries.slice(0, visibleSeries).forEach(serie => {
+        const seriesCard = document.createElement("div");
+        seriesCard.classList.add("col-md-3", "mb-4");
+        seriesCard.innerHTML = `
+          <div class="card">
+            <img src="${serie.poster}" class="card-img-top" alt="${serie.title}">
+            <div class="card-body">
+              <h5 class="card-title">${serie.title}</h5>
+              <p class="card-text">${serie.year}</p>
+            </div>
+          </div>
+        `;
+        seriesCard.addEventListener("click", () => showMovieDetails(serie));
+        container.appendChild(seriesCard);
+      });
+
+      // Afficher ou masquer les boutons "Plus de séries" et "Moins de séries"
+      if (filteredSeries.length > visibleSeries) {
+        document.getElementById("loadMoreSeriesButton").style.display = "block";
+        document.getElementById("showLessSeriesButton").style.display = "none";
+      } else {
+        document.getElementById("loadMoreSeriesButton").style.display = "none";
+        document.getElementById("showLessSeriesButton").style.display = "none";
+      }
+    }
+
+    // Filtrer les films par genre
+    function filterMovies(genre) {
+      currentMovieGenre = genre;
+      visibleMovies = 4; // Réinitialiser le nombre de films visibles
+      displayMovies();
+    }
+
+    // Filtrer les séries TV par genre
+    function filterSeries(genre) {
+      currentSeriesGenre = genre;
+      visibleSeries = 4; // Réinitialiser le nombre de séries visibles
+      displaySeries();
+    }
+
+    // Afficher plus de films
+    function loadMoreMovies() {
+      visibleMovies += 4; // Augmenter le nombre de films visibles
+      displayMovies();
+      if (visibleMovies >= movies.length) {
+        document.getElementById("loadMoreMoviesButton").style.display = "none";
+        document.getElementById("showLessMoviesButton").style.display = "block";
+      }
+    }
+
+    // Afficher moins de films
+    function showLessMovies() {
+      visibleMovies = 4; // Réinitialiser le nombre de films visibles
+      displayMovies();
+      document.getElementById("loadMoreMoviesButton").style.display = "block";
+      document.getElementById("showLessMoviesButton").style.display = "none";
+    }
+
+    // Afficher plus de séries
+    function loadMoreSeries() {
+      visibleSeries += 4; // Augmenter le nombre de séries visibles
+      displaySeries();
+      if (visibleSeries >= series.length) {
+        document.getElementById("loadMoreSeriesButton").style.display = "none";
+        document.getElementById("showLessSeriesButton").style.display = "block";
+      }
+    }
+
+    // Afficher moins de séries
+    function showLessSeries() {
+      visibleSeries = 4; // Réinitialiser le nombre de séries visibles
+      displaySeries();
+      document.getElementById("loadMoreSeriesButton").style.display = "block";
+      document.getElementById("showLessSeriesButton").style.display = "none";
+    }
+
+    // Afficher les détails du film ou de la série dans le modal
+    function showMovieDetails(item) {
+      document.getElementById("movieTitle").innerText = item.title;
+      document.getElementById("movieYear").innerText = item.year;
+      document.getElementById("movieGenre").innerText = item.genre;
+      document.getElementById("movieDirector").innerText = item.director;
+      document.getElementById("movieActors").innerText = item.actors;
+      document.getElementById("movieDescription").innerText = item.description;
+      document.getElementById("movieTrailer").src = item.trailer;
+      new bootstrap.Modal(document.getElementById('movieModal')).show();
+    }
+
+    // Récupérer les éléments du DOM
+    const shopMoviesRow = document.getElementById("shop-movies-row");
+    const scrollLeftButton = document.getElementById("scrollLeftButton");
+    const scrollRightButton = document.getElementById("scrollRightButton");
+
+    // Définir la distance de défilement
+    const scrollAmount = 300; // Ajustez cette valeur selon vos besoins
+
+    // Défilement vers la gauche
+    scrollLeftButton.addEventListener("click", () => {
+      shopMoviesRow.scrollBy({
+        left: -scrollAmount, // Défilement vers la gauche
+        behavior: "smooth", // Défilement fluide
+      });
+    });
+
+    // Défilement vers la droite
+    scrollRightButton.addEventListener("click", () => {
+      shopMoviesRow.scrollBy({
+        left: scrollAmount, // Défilement vers la droite
+        behavior: "smooth", // Défilement fluide
+      });
+    });
+
+    // Afficher les films dans la section Boutique Film
+    function displayShopMovies() {
+      const container = document.getElementById("shop-movies-row");
+      container.innerHTML = ""; // Vider le conteneur avant de le remplir
+
+      shopMovies.forEach((movie) => {
+        const movieCard = document.createElement("div");
+        movieCard.classList.add("card");
+        movieCard.innerHTML = `
+          <img src="${movie.poster}" class="card-img-top" alt="${movie.title}">
+          <div class="card-body">
+            <h5 class="card-title">${movie.title}</h5>
+            <p class="card-text">${movie.description}</p>
+          </div>
+        `;
+        container.appendChild(movieCard);
+      });
+    }
+
+    // Afficher les films au chargement de la page
+    window.addEventListener("DOMContentLoaded", () => {
+      displayShopMovies();
+    });
+
+    // Gérer le formulaire de contact
+    document.getElementById("contactForm").addEventListener("submit", function (e) {
+      e.preventDefault(); // Empêcher le rechargement de la page
+
+      // Récupérer les valeurs du formulaire
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const subject = document.getElementById("subject").value;
+      const message = document.getElementById("message").value;
+
+      // Afficher les valeurs dans le modal
+      document.getElementById("modalName").innerText = name;
+      document.getElementById("modalEmail").innerText = email;
+      document.getElementById("modalSubject").innerText = subject;
+      document.getElementById("modalMessage").innerText = message;
+
+      // Afficher le modal
+      new bootstrap.Modal(document.getElementById('contactModal')).show();
+
+      // Réinitialiser le formulaire
+      document.getElementById("contactForm").reset();
+    });
+
+    // Ouvrir le modal Date de Naissance au chargement de la page
+    window.addEventListener('DOMContentLoaded', () => {
+      const birthDateCookie = getCookie("birthDate");
+      const cookieConsent = getCookie("cookieConsent");
+
+      if (!birthDateCookie) {
+        // Afficher le modal de date de naissance
+        var birthDateModal = new bootstrap.Modal(document.getElementById('birthDateModal'));
+        birthDateModal.show();
+      } else if (!cookieConsent) {
+        // Afficher la boîte de consentement aux cookies
+        document.getElementById("cookieConsentBox").style.display = "block";
+      } else {
+        // Afficher le contenu si les deux conditions sont remplies
+        showContent();
+      }
+    });
+
+    // Valider l'âge et afficher les éléments
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const birthDate = new Date(document.getElementById("birthDate").value);
+      const age = new Date().getFullYear() - birthDate.getFullYear();
+
+      if (age < 18) {
+        alert("Vous êtes mineur. Redirection vers IMDb.");
+        window.location.href = "https://www.imdb.com";
+      } else {
+        alert("Bienvenue sur le site !");
+        setCookie("birthDate", document.getElementById("birthDate").value, 30); // Expire dans 30 jours
+
+        // Afficher la boîte de consentement aux cookies après validation de la date de naissance
+        document.getElementById("cookieConsentBox").style.display = "block";
+
+        // Afficher tout le contenu
+        showContent();
+
+        // Fermeture du modal après validation
+        const birthDateModal = bootstrap.Modal.getInstance(document.getElementById('birthDateModal'));
+        birthDateModal.hide();
+      }
+    });
+
+    // Liste des films
+    const shopMovies = [
+      {
+        title: "Swiss Army Man",
+        poster: "https://3.bp.blogspot.com/-cKFsw1I-VTg/WMj_dYGrLRI/AAAAAAABU0Q/3-zBpGEXJPwrVKry1RQT61nVMoZpFUa2wCEw/s1600/POSTER-Swiss-Army-Man.jpeg",
+      },
+      {
+        title: "Me Before You",
+        poster: "https://m.media-amazon.com/images/M/MV5BMTQ2NjE4NDE2NV5BMl5BanBnXkFtZTgwOTcwNDE5NzE@._V1_FMjpg_UX1000_.jpg",
+      },
+      {
+        title: "Deadpool",
+        poster: "https://m.media-amazon.com/images/M/MV5BYzE5MjY1ZDgtMTkyNC00MTMyLThhMjAtZGI5OTE1NzFlZGJjXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_FMjpg_UX1000_.jpg",
+      },
+      {
+        title: "Rogue One",
+        poster: "https://m.media-amazon.com/images/M/MV5BMjEwMzMxODIzOV5BMl5BanBnXkFtZTgwNzg3OTAzMDI@._V1_FMjpg_UX1000_.jpg",
+      },
+      {
+        title: "Mechanic",
+        poster: "https://image.tmdb.org/t/p/original/qSdbYO3vUQktu9b47WwuXtFrPGC.jpg",
+      },
+      {
+        title: "Timeless",
+        poster: "https://img.netzwelt.de/dw1600_dh900_sw1920_sh1080_sx0_sy0_sr16x9_nu2/picture/original/2020/10/timeless-286997.jpeg",
+      },
+    ];
+
+    // Fonction pour gérer la recherche
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+      e.preventDefault(); // Empêcher le rechargement de la page
+
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+
+      // Filtrer les films
+      const filteredMovies = movies.filter(movie =>
+        movie.title.toLowerCase().includes(searchTerm)
+      );
+
+      // Filtrer les séries
+      const filteredSeries = series.filter(serie =>
+        serie.title.toLowerCase().includes(searchTerm)
+      );
+
+      // Afficher les résultats
+      displayFilteredResults(filteredMovies, filteredSeries);
+    });
+
+    // Fonction pour afficher les résultats filtrés
+    function displayFilteredResults(filteredMovies, filteredSeries) {
+      const moviesContainer = document.getElementById("movies-container");
+      const seriesContainer = document.getElementById("series-container");
+
+      moviesContainer.innerHTML = ''; // Vider le conteneur
+      seriesContainer.innerHTML = ''; // Vider le conteneur
+
+      if (filteredMovies.length === 0 && filteredSeries.length === 0) {
+        moviesContainer.innerHTML = '<p class="text-center">Aucun résultat trouvé.</p>';
+        return;
+      }
+
+      // Afficher les films filtrés
+      filteredMovies.forEach(movie => {
+        const movieCard = document.createElement("div");
+        movieCard.classList.add("col-md-3", "mb-4");
+        movieCard.innerHTML = `
+          <div class="card">
+            <img src="${movie.poster}" class="card-img-top" alt="${movie.title}">
+            <div class="card-body">
+              <h5 class="card-title">${movie.title}</h5>
+              <p class="card-text">${movie.year}</p>
+            </div>
+          </div>
+        `;
+        movieCard.addEventListener("click", () => showMovieDetails(movie));
+        moviesContainer.appendChild(movieCard);
+      });
+
+      // Afficher les séries filtrées
+      filteredSeries.forEach(serie => {
+        const seriesCard = document.createElement("div");
+        seriesCard.classList.add("col-md-3", "mb-4");
+        seriesCard.innerHTML = `
+          <div class="card">
+            <img src="${serie.poster}" class="card-img-top" alt="${serie.title}">
+            <div class="card-body">
+              <h5 class="card-title">${serie.title}</h5>
+              <p class="card-text">${serie.year}</p>
+            </div>
+          </div>
+        `;
+        seriesCard.addEventListener("click", () => showMovieDetails(serie));
+        seriesContainer.appendChild(seriesCard);
+      });
+    }
+
+    //bouton pour scroller
+    const ButtonTopscrollTo = document.createElement('button');
+    ButtonTopscrollTo.id = 'scrollToTopBtn';
+    ButtonTopscrollTo.innerHTML = '↑'; // Vous pouvez utiliser une icône ou un texte
+
+    // Ajouter le bouton au DOM
+    document.body.appendChild(ButtonTopscrollTo);
+
+    // Gérer l'événement de clic
+    ButtonTopscrollTo.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // Gérer la visibilité du bouton
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) { // Afficher le bouton après avoir scrollé 200px
+        ButtonTopscrollTo.style.display = 'block';
+      } else {
+        ButtonTopscrollTo.style.display = 'none';
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
