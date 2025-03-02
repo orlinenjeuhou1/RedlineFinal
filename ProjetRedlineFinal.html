@@ -42,6 +42,90 @@
     <!-- Contenu du site (masqué par défaut) -->
     <div id="mainContent" style="display: none;">
     </div>
+     <!-- Boutons LOGIN et REGISTER -->
+     <div class="mt-4">
+        <button type="button" class="btn btn-primary" id="loginButton" data-bs-toggle="modal" data-bs-target="#loginModal">
+          LOGIN
+        </button>
+        <button type="button" class="btn btn-success" id="registerButton" data-bs-toggle="modal" data-bs-target="#registerModal">
+          REGISTER
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Login -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginModalLabel">Connexion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulaire de connexion -->
+          <form id="loginForm">
+            <div class="mb-3">
+              <label for="username" class="form-label">Identifiant</label>
+              <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Mot de passe</label>
+              <input type="password" class="form-control" id="password" required>
+            </div>
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="rememberMe">
+              <label class="form-check-label" for="rememberMe">Rester connecté</label>
+            </div>
+            <a href="#" class="text-decoration-none">Mot de passe oublié ?</a>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="loginBtn">Se connecter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+   <!-- Modal Register -->
+   <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="registerModalLabel">Inscription</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Formulaire d'inscription -->
+          <form id="registerForm">
+            <div class="mb-3">
+              <label for="usernameRegister" class="form-label">Nom</label>
+              <input type="text" class="form-control" id="usernameRegister" required>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Courrier</label>
+              <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="mb-3">
+              <label for="passwordRegister" class="form-label">Mot de passe</label>
+              <input type="password" class="form-control" id="passwordRegister" required>
+            </div>
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirmer le mot de passe</label>
+              <input type="password" class="form-control" id="confirmPassword" required>
+            </div>
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="terms">
+              <label class="form-check-label" for="terms">Accepter les termes</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" id="registerBtn">S'inscrire</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
     <script>
         // Fonction pour définir un cookie
